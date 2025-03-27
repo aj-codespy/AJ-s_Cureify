@@ -3,6 +3,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from symptoms import retrieve_and_answer
 from query import queryAnalysis
 from imageAgent import imgClassifier
+import os  # Add this line at the top
 
 def routerAgent(img, prompt, chatHistory):
     base = '''From the given prompt, determine the task:
