@@ -54,12 +54,14 @@ def query_vector_db(query_text, index, text_chunks, k=3):
     retrieved_chunks = [text_chunks[i] for i in indices[0]]
     return "\n".join(retrieved_chunks)
 
-def retrieve_and_answer(query_text, chatHistory, index_path="faiss_index.idx", chunks_file="text_chunks.pkl", k=4):
-    index, stored_chunks = load_vector_db(index_path, chunks_file)
-    context = query_vector_db(query_text, index, stored_chunks, k)
-    
-    while True:
-        response = answer_generation(f"Context: {context}\nQuestion: {query_text}", chatHistory)
-        if "diagnosis" in response.lower() or "i need more details" in response.lower():
-            return response
-        query_text = input("Follow-up question: ")
+import json
+from structAgent import answer_generation
+
+def retrieve_and_answer(symptom_data):
+    data = json.loads(symptom_data)
+    context = data.get("context", "")
+    query_text = data.get("query_text", "")
+    chatHistory = data.get("chatHistory", [])
+
+    response = answer_generation(f"Context: {context}\\nQuestion: {query_text}", chatHistory)
+    return response
