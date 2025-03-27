@@ -4,7 +4,7 @@ from main import mainAgent
 
 st.title('Cureify: Clinical Decision Support System.')
 
-prompt = st.input('Enter your prompt')
+prompt = st.text_input('Enter your prompt')
 img = st.file_uploader('Upload an image')
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
