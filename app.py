@@ -1,19 +1,20 @@
-import streamlit as st 
+import streamlit as st
 from PIL import Image
 from main import mainAgent
 
-st.title('Cureify: Clinical Decision Support System.')
+st.title('Cureify: Clinical Decision Support System')
 
-prompt = st.text_input('Enter your prompt')
-img = st.file_uploader('Upload an image')
-if img is not None:
+prompt = st.text_input('Enter your symptoms or medical query')
+img = st.file_uploader('Upload an image (optional)')
+
+if img:
     image = Image.open(img)
     st.markdown(
         """
         <style>
         .stImage img {
-            max-width: 20%; /* Adjusts image size to 0% of the container */
-            max-height: 400px; /* Limits height to prevent oversized images */
+            max-width: 40%; /* Adjust image size */
+            max-height: 400px;
             display: block;
             margin: auto;
         }
@@ -21,10 +22,11 @@ if img is not None:
         """,
         unsafe_allow_html=True
     )
-    
     st.image(image, caption="Uploaded Image", use_container_width=True)
-    
-result = mainAgent(prompt, img)
 
 if st.button('Submit'):
-    st.write(result)
+    if prompt or img:
+        result = mainAgent(prompt, img)
+        st.write(result)
+    else:
+        st.warning("Please enter symptoms or upload an image before submitting.")
