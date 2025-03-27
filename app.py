@@ -8,7 +8,21 @@ prompt = st.text_input('Enter your prompt')
 img = st.file_uploader('Upload an image')
 if img is not None:
     image = Image.open(img)
-    st.image(image, caption="Uploaded Image", use_container_width=True)
+    st.markdown(
+        """
+        <style>
+        .stImage img {
+            max-width: 80%; /* Adjusts image size to 80% of the container */
+            max-height: 500px; /* Limits height to prevent oversized images */
+            display: block;
+            margin: auto;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+    
+    st.image(img, caption="Uploaded Image", use_container_width=True)
     
 result = mainAgent(prompt, img)
 
