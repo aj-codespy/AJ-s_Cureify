@@ -12,8 +12,8 @@ if img is not None:
         """
         <style>
         .stImage img {
-            max-width: 80%; /* Adjusts image size to 80% of the container */
-            max-height: 500px; /* Limits height to prevent oversized images */
+            max-width: 50%; /* Adjusts image size to 0% of the container */
+            max-height: 200px; /* Limits height to prevent oversized images */
             display: block;
             margin: auto;
         }
