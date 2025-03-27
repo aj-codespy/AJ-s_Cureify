@@ -6,8 +6,8 @@ st.title('Cureify: Clinical Decision Support System.')
 
 prompt = st.text_input('Enter your prompt')
 img = st.file_uploader('Upload an image')
-if uploaded_file is not None:
-    image = Image.open(uploaded_file)
+if img is not None:
+    image = Image.open(img)
     st.image(image, caption="Uploaded Image", use_column_width=True)
     
 result = mainAgent(prompt, img)
