@@ -25,48 +25,41 @@ def answer_generation(input, chatHistory):
     llm = ChatGoogleGenerativeAI(
         model='gemini-1.5-flash',
         temperature=0,
-        api_key='AIzaSyDtB4bETfNDyvpzA_NnBKMrr56rdiOE8bQ',
+        api_key=os.getenv("AIzaSyDtB4bETfNDyvpzA_NnBKMrr56rdiOE8bQ"),
         max_tokens=None,
         timeout=30,
         max_retries=2
     )
+    
     prompt = ChatPromptTemplate.from_messages([
-        ("system", '''Role: You are a Medical Diagnosis Specialist AI with deep expertise in diseases, symptoms, and medical conditions. Your task is to analyze user symptoms and identify the most probable diagnosis.
+        ("system", '''You are a Medical AI that diagnoses diseases based on symptoms.
 Instructions:
-Diagnosis: If symptoms clearly indicate a disease, provide a concise yet detailed explanation.
-Clarification: If multiple conditions match, ask relevant follow-up questions to narrow it down.
-Uncertainty: If data is insufficient, respond with:
-"I can't make a definitive diagnosis based on the given data. Please provide more details."
-Guidance: Offer medical insights but do not provide prescriptions or treatment advice—recommend consulting a doctor when necessary.
-Keep responses accurate, structured, and professional while maintaining an empathetic tone. Ask only one question at a time.'''),
+1. If symptoms clearly indicate a disease, provide a diagnosis.
+2. If symptoms are unclear, ask a follow-up question.
+3. If unsure, say: "I need more details."
+4. Always ask **one** question at a time.
+'''),
         MessagesPlaceholder("chat_history"),
         ("human", "{Question}")
     ])
+    
     chain = prompt | llm
-    response = chain.invoke({"Question": input,  "chat_history": chatHistory})
+    response = chain.invoke({"Question": input, "chat_history": chatHistory})
     chatHistory.extend([HumanMessage(content=input), response.content])
     return response.content
 
-def query_vector_db_with_rag(query_text, index, text_chunks, k=3):
+def query_vector_db(query_text, index, text_chunks, k=3):
     query_embedding = np.array(get_text_embeddings(query_text)).astype('float32').reshape(1, -1)
     distances, indices = index.search(query_embedding, k)
     retrieved_chunks = [text_chunks[i] for i in indices[0]]
-    context = "\n".join(retrieved_chunks)
-    return context
+    return "\n".join(retrieved_chunks)
 
 def retrieve_and_answer(query_text, chatHistory, index_path="faiss_index.idx", chunks_file="text_chunks.pkl", k=4):
     index, stored_chunks = load_vector_db(index_path, chunks_file)
-    context = query_vector_db_with_rag(query_text, index, stored_chunks, k)
-    response = answer_generation(f"Context: {context}\nQuestion: {query_text}", chatHistory)
-    return response
-
-
-# prompt1 = 0
-# chatHistory = []
-# while prompt1 != '1':
-#     prompt1 = input('Enter your symptoms: ')
-#     output = retrieve_and_answer(prompt1, chatHistory)
-#     print(output)
-
-#print(chatHistory)
-
+    context = query_vector_db(query_text, index, stored_chunks, k)
+    
+    while True:
+        response = answer_generation(f"Context: {context}\nQuestion: {query_text}", chatHistory)
+        if "diagnosis" in response.lower() or "i need more details" in response.lower():
+            return response
+        query_text = input("Follow-up question: ")
