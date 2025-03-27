@@ -22,7 +22,7 @@ if img is not None:
         unsafe_allow_html=True
     )
     
-    st.image(img, caption="Uploaded Image", use_container_width=True)
+    st.image(image, caption="Uploaded Image", use_container_width=True)
     
 result = mainAgent(prompt, img)
 
